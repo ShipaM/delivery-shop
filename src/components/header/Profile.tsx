@@ -12,7 +12,7 @@ const Profile = () => {
         height={40}
         className="rounded-[50%] min-w-10 min-h-10"
       />
-      <p className="hidden xl:block cursor-pointer p-2.5">Алексей</p>
+      <p className="hidden xl:block cursor-pointer p-2.5">Maksym</p>
       <button className="hidden xl:block cursor-pointer p-2">
         <Image
           src={iconArrow}
