@@ -4,7 +4,7 @@ export type ProductCardProps = {
   title: string;
   description: string;
   basePrice: number;
-  discountPercent: number;
+  discountPercent?: number;
   rating: number;
   categories: string[];
   weight: string;

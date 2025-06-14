@@ -1,4 +1,32 @@
 {
+  "users": [
+    {
+      "id": 1,
+      "name": "John Doe",
+      "email": "mV2d6@example.com",
+      "password": "password123",
+      "address": "123 Main St, Anytown, USA",
+      "phone": "123-456-7890",
+      "purchases": [
+        {
+          "id": 1,
+          "date": "2023-08-01"
+        },
+        {
+          "id": 2,
+          "date": "2023-08-02"
+        },
+        {
+          "id": 3,
+          "date": "2023-08-03"
+        },
+        {
+          "id": 4,
+          "date": "2023-08-04"
+        }
+      ]
+    }
+  ],
   "products": [
     {
       "id": 1,
