@@ -1,10 +1,24 @@
 import Image from "next/image";
 import iconRight from "../../public/icons-header/icon-arrow-right.svg";
-import articlesDatabase from "@/data/articlesDatabase.json";
 import Link from "next/link";
+import { getArticles } from "@/app/api/articles/route";
+import { Article } from "@/types/article";
 
-const Articles = () => {
-  const articles = articlesDatabase;
+const Articles = async () => {
+  let articles: Article[] = [];
+  let error = null;
+
+  try {
+    articles = (await getArticles()) as unknown as Article[];
+    console.log(articles);
+  } catch (err) {
+    error = err instanceof Error ? err.message : "Неизвестная ошибка";
+    console.error("Ошибка в компоненте Articles:", err);
+  }
+
+  if (error) {
+    return <div className="text-red-500 py-8">Ошибка: {error}</div>;
+  }
 
   return (
     <section>
@@ -31,7 +45,7 @@ const Articles = () => {
         {/* Список статей */}
         <ul className="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-3 gap-6">
           {articles.map((article) => (
-            <li key={article.id} className="h-75 md:h-105">
+            <li key={article._id} className="h-75 md:h-105">
               <article className="bg-white h-full flex flex-col rounded overflow-hidden shadow-(--shadow-card) hover:shadow-(--shadow-article) duration-300">
                 <div className="relative h-48 w-full">
                   <Image

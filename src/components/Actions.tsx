@@ -1,14 +1,22 @@
 import Image from "next/image";
 import iconRight from "/public/icons-products/icon-arrow-right.svg";
 import ProductCard from "./ProductCard";
-import database from "@/data/database.json";
 import { ProductCardProps } from "@/types/product";
+import { getProductsByCategory } from "@/app/api/products/route";
 
-const Actions = () => {
-  const actionProducts = database.products.filter((p) =>
-    p.categories.includes("actions")
-  );
+export default async function Actions() {
+  let products: ProductCardProps[] = [];
+  let error = null;
 
+  try {
+    products = (await getProductsByCategory(
+      "actions"
+    )) as unknown as ProductCardProps[];
+  } catch (err) {
+    error = err instanceof Error ? err.message : "Unknown error";
+  }
+
+  if (error) return <div className="text-red-500 py-8">Error:{error}</div>;
   return (
     <section>
       <div className="flex flex-col justify-center xl:max-w-[1208px]">
@@ -30,7 +38,7 @@ const Actions = () => {
           </button>
         </div>
         <ul className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6 xl:gap-10 justify-items-center">
-          {actionProducts.slice(0, 4).map((item, index) => (
+          {products.slice(0, 4).map((item, index) => (
             <li
               key={item.id}
               className={`${index >= 4 ? "hidden" : ""}
@@ -45,6 +53,4 @@ const Actions = () => {
       </div>
     </section>
   );
-};
-
-export default Actions;
+}
