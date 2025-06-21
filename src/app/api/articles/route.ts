@@ -10,6 +10,7 @@ export async function getArticles() {
   const { db } = await getDBAndRequestBody(clientPromise, null);
   return await db.collection("articles").find().toArray();
 }
+export const revalidate = 3600;
 
 export async function GET() {
   try {

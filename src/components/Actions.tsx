@@ -1,8 +1,7 @@
-import Image from "next/image";
-import iconRight from "/public/icons-products/icon-arrow-right.svg";
 import ProductCard from "./ProductCard";
 import { ProductCardProps } from "@/types/product";
 import { getProductsByCategory } from "@/app/api/products/route";
+import ViewAllButton from "./ViewAllButton";
 
 export default async function Actions() {
   let products: ProductCardProps[] = [];
@@ -24,18 +23,7 @@ export default async function Actions() {
           <h2 className="text-2xl xl:text-4xl text-left font-bold text-[#414141]">
             Акции
           </h2>
-          <button className="flex flex-row items-center gap-x-2 cursor-pointer">
-            <p className="text-base text-center text-[#606060] hover:text-[#bfbfbf] duration-300">
-              Все акции
-            </p>
-            <Image
-              src={iconRight}
-              alt="К акциям"
-              width={24}
-              height={24}
-              sizes="24px"
-            />
-          </button>
+          <ViewAllButton btnText="Все акции" href={"/actions"} />
         </div>
         <ul className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6 xl:gap-10 justify-items-center">
           {products.slice(0, 4).map((item, index) => (

@@ -11,7 +11,7 @@ const Purchases = async () => {
     purchases = (await getPurchases()) as unknown as ProductCardProps[];
   } catch (err) {
     error = err instanceof Error ? err.message : "Неизвестная ошибка";
-    console.error("Ошибка в компоненте Actions:", err);
+    console.error("Ошибка в компоненте Purchases:", err);
   }
 
   if (error) {
@@ -25,7 +25,9 @@ const Purchases = async () => {
           <h2 className="text-2xl xl:text-4xl text-left font-bold text-[#414141]">
             Покупали раньше
           </h2>
-          {purchases.length > 0 && <ViewAllButton btnText="Все покупки" />}
+          {purchases.length > 0 && (
+            <ViewAllButton btnText="Все покупки" href="/purchases" />
+          )}
         </div>
         <ul className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6 xl:gap-10 justify-items-center">
           {purchases.slice(0, 4).map((item, index) => (
