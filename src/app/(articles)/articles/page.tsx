@@ -1,23 +1,25 @@
 import { fetchArticles } from "../fetchArticles";
-import ArticleSection from "../ArticlesSection";
+import GenericListPage from "@/app/(products)/GenericListPage";
 
 export const metadata = {
   title: 'Articles on the website of the store "Severyanochka"',
   description: 'Read articles on the website of the store "Severyanochka"',
 };
 
-const AllArticles = async () => {
-  const { data: articles, error } = await fetchArticles();
-
-  if (error) {
-    return <div className="text-red-500 py-8">Ошибка: {error}</div>;
-  }
-
+const AllArticles = async ({
+  searchParams,
+}: {
+  searchParams: Promise<{ page?: string; itemsPerPage?: string }>;
+}) => {
   return (
-    <ArticleSection
-      title="All articles"
-      viewAllButton={{ text: "Back to main", href: "/" }}
-      articles={articles || []}
+    <GenericListPage
+      searchParams={searchParams}
+      props={{
+        fetchData: () => fetchArticles(),
+        pageTitle: "All articles",
+        basePath: "/articles",
+        contentType: "articles",
+      }}
     />
   );
 };
