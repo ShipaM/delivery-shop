@@ -43,13 +43,11 @@ const GenericListPage = async ({
       {!props.contentType ? (
         <ProductsSection
           title={props.pageTitle}
-          viewAllButton={{ text: "Go to main", href: "/" }}
           products={paginatedItems as ProductCardProps[]}
         />
       ) : (
         <ArticleSection
           title={props.pageTitle}
-          viewAllButton={{ text: "Go to main", href: "/" }}
           articles={paginatedItems as ArticleCardProps[]}
         />
       )}

@@ -35,7 +35,7 @@ export async function GET() {
 
     return NextResponse.json(purchases);
   } catch (error) {
-    console.error("ошибка сервера:", error);
-    return NextResponse.json({ message: "Ошибка сервера" }, { status: 500 });
+    console.error("Server error:", error);
+    return NextResponse.json({ message: "Server error" }, { status: 500 });
   }
 }

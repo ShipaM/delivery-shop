@@ -18,7 +18,7 @@ export async function GET() {
 
     return NextResponse.json(articles);
   } catch (error) {
-    console.error("Ошибка сервера:", error);
-    return NextResponse.json({ message: "Ошибка сервера" }, { status: 500 });
+    console.error("Server error:", error);
+    return NextResponse.json({ message: "Server error" }, { status: 500 });
   }
 }

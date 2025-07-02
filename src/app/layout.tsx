@@ -3,6 +3,7 @@ import { Rubik } from "next/font/google";
 import "./globals.css";
 import Footer from "@/components/Footer";
 import Header from "@/components/Header/Header";
+import Breadcrumbs from "@/components/BreadCrumbs";
 
 const rubik = Rubik({
   variable: "--font-rubic",
@@ -26,6 +27,7 @@ export default function RootLayout({
         suppressHydrationWarning={true}
       >
         <Header />
+        <Breadcrumbs />
         {children}
         <Footer />
       </body>
