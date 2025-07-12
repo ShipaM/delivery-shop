@@ -1,22 +1,37 @@
-import { getArticles } from "../api/articles/route";
-import { Article } from "@/types/article";
-
-export const fetchArticles = async (): Promise<{
-  data: Article[] | null;
-  error: string | null;
-}> => {
+const fetchArticles = async (options?: {
+  articlesLimit?: number;
+  pagination?: { startIdx: number; perPage: number };
+}) => {
   try {
-    const articles = await getArticles();
+    const url = new URL(`${process.env.NEXT_PUBLIC_BASE_URL}/api/articles`);
+
+    if (options?.articlesLimit) {
+      url.searchParams.append(
+        "articlesLimit",
+        options.articlesLimit.toString()
+      );
+    } else if (options?.pagination) {
+      url.searchParams.append(
+        "startIdx",
+        options.pagination.startIdx.toString()
+      );
+      url.searchParams.append("perPage", options.pagination.perPage.toString());
+    }
+
+    const res = await fetch(url.toString(), { next: { revalidate: 3600 } });
+
+    if (!res.ok) throw new Error("Server error retrieving articles");
+
+    const data = await res.json();
+
     return {
-      data: articles as unknown as Article[],
-      error: null,
+      items: data.articles || data,
+      totalCount: data.totalCount || data.length,
     };
   } catch (err) {
-    const error = err instanceof Error ? err.message : "Unknown error";
-    console.error(`Error while getting articles:`, err);
-    return {
-      data: null,
-      error,
-    };
+    console.error(`Error in the articles component`, err);
+    throw err;
   }
 };
+
+export default fetchArticles;

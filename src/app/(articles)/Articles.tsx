@@ -1,21 +1,23 @@
-import { fetchArticles } from "./fetchArticles";
+import fetchArticles from "./fetchArticles";
 import ArticleSection from "./ArticlesSection";
+import { CONFIG } from "../../../config/config";
 
 const Articles = async () => {
-  const { data: articles, error } = await fetchArticles();
+  try {
+    const { items } = await fetchArticles({
+      articlesLimit: CONFIG.ITEMS_PER_PAGE_MAIN_ARTICLES,
+    });
 
-  if (error) {
-    return <div className="text-red-500 py-8">Error: {error}</div>;
+    return (
+      <ArticleSection
+        title="Articles"
+        viewAllButton={{ text: "All articles", href: "articles" }}
+        articles={items}
+      />
+    );
+  } catch {
+    return <div className="text-red-500">Error: Failed to load articles</div>;
   }
-
-  return (
-    <ArticleSection
-      title="Articles"
-      viewAllButton={{ text: "All articles", href: "articles" }}
-      articles={articles || []}
-      compact
-    />
-  );
 };
 
 export default Articles;

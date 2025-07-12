@@ -1,39 +1,62 @@
-import { getDBAndRequestBody } from "../../../../utils/api-routes";
+import { CONFIG } from "../../../../config/config";
+import { getDB } from "../../../../utils/api-routes";
 import { NextResponse } from "next/server";
-import { MongoClient } from "mongodb";
-
-const clientPromise = new MongoClient(
-  process.env.DELIVERY_SHOP_DB_URL!
-).connect();
-
-export async function getProductsByCategory(category: string) {
-  const { db } = await getDBAndRequestBody(clientPromise, null);
-  return await db
-    .collection("products")
-    .find({ categories: category })
-    .toArray();
-}
-
-export const revalidate = 3600;
 export const dynamic = "force-dynamic";
+export const revalidate = 3600;
 
 export async function GET(request: Request) {
   try {
-    const { searchParams } = new URL(request.url);
-    const category = searchParams.get("category");
+    const db = await getDB();
+    const url = new URL(request.url);
+
+    const category = url.searchParams.get("category");
+    const randomLimit = url.searchParams.get("randomLimit");
+    const startIdx = parseInt(url.searchParams.get("startIdx") || "0");
+    const perPage = parseInt(
+      url.searchParams.get("perPage") || CONFIG.ITEMS_PER_PAGE.toString()
+    );
 
     if (!category) {
       return NextResponse.json(
-        { message: "Category parameter required" },
+        { message: "Category parameter is required" },
         { status: 400 }
       );
     }
 
-    const products = await getProductsByCategory(category);
+    const query = {
+      categories: category,
+      quantity: { $gt: 0 },
+    };
 
-    return NextResponse.json(products);
+    if (randomLimit) {
+      const pipeline = [
+        { $match: query },
+        { $sample: { size: parseInt(randomLimit) } },
+      ];
+
+      const products = await db
+        .collection("products")
+        .aggregate(pipeline)
+        .toArray();
+      return NextResponse.json(products);
+    }
+
+    const totalCount = await db.collection("products").countDocuments(query);
+
+    const products = await db
+      .collection("products")
+      .find(query)
+      .sort({ _id: 1 })
+      .skip(startIdx)
+      .limit(perPage)
+      .toArray();
+
+    return NextResponse.json({ products, totalCount });
   } catch (error) {
-    console.error("server error:", error);
-    return NextResponse.json({ message: "server error" }, { status: 500 });
+    console.error("Server error:", error);
+    return NextResponse.json(
+      { message: "Error loading products" },
+      { status: 500 }
+    );
   }
 }

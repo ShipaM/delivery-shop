@@ -21,13 +21,14 @@ const CatalogPage = () => {
   const fetchCategories = async () => {
     try {
       const response = await fetch("api/catalog");
-      if (!response.ok) throw new Error(`Server error: ${response.status}`);
+      if (!response.ok)
+        throw new Error(`Server response error: ${response.status}`);
 
       const data: CatalogProps[] = await response.json();
       setCategories(data.sort((a, b) => a.order - b.order));
     } catch (error) {
-      console.error("Failed to fetch categories:", error);
-      setError("Failed to fetch categories:");
+      console.error("Failed to get categories:", error);
+      setError("Failed to get categories");
     } finally {
       setIsLoading(false);
     }

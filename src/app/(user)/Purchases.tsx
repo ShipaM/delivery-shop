@@ -1,21 +1,27 @@
-import { fetchPurchases } from "./fetchPurchases";
+import fetchPurchases from "./fetchPurchases";
+import { CONFIG } from "../../../config/config";
 import ProductsSection from "../(products)/ProductsSection";
 
 const Purchases = async () => {
-  const { data: purchases, error } = await fetchPurchases();
+  try {
+    const { items } = await fetchPurchases({
+      userPurchasesLimit: CONFIG.ITEMS_PER_PAGE_MAIN_PRODUCTS,
+    });
 
-  if (error) {
-    return <div className="text-red-500 py-8">Error: {error}</div>;
+    return (
+      <ProductsSection
+        title="Purchased before"
+        viewAllButton={{ text: "All purchases", href: "purchases" }}
+        products={items}
+      />
+    );
+  } catch {
+    return (
+      <div className="text-red-500">
+        Ошибка: не удалось загрузить Ваши покупки
+      </div>
+    );
   }
-
-  return (
-    <ProductsSection
-      title="Purchased before"
-      viewAllButton={{ text: "All purchases", href: "purchases" }}
-      products={purchases || []}
-      compact
-    />
-  );
 };
 
 export default Purchases;

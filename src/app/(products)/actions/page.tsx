@@ -1,4 +1,4 @@
-import { fetchProductsByCategory } from "../fetchProducts";
+import fetchProductsByCategory from "../fetchProducts";
 import GenericListPage from "../GenericListPage";
 
 export const metadata = {
@@ -6,19 +6,25 @@ export const metadata = {
   description: "Promotional items from the Severianochka store",
 };
 
-export default async function AllActions({
+const AllActions = async ({
   searchParams,
 }: {
   searchParams: Promise<{ page?: string; itemsPerPage?: string }>;
-}) {
+}) => {
   return (
     <GenericListPage
       searchParams={searchParams}
       props={{
-        fetchData: () => fetchProductsByCategory("actions"),
+        fetchData: ({ pagination: { startIdx, perPage } }) =>
+          fetchProductsByCategory("actions", {
+            pagination: { startIdx, perPage },
+          }),
         pageTitle: "All actions",
         basePath: "/actions",
+        errorMessage: "Error: Failed to load stocks",
       }}
     />
   );
-}
+};
+
+export default AllActions;

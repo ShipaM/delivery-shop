@@ -1,22 +1,39 @@
-import { ProductCardProps } from "@/types/product";
-import { getPurchases } from "../api/users/purchases/route";
-
-export const fetchPurchases = async (): Promise<{
-  data: ProductCardProps[] | null;
-  error: string | null;
-}> => {
+const fetchPurchases = async (options?: {
+  userPurchasesLimit?: number;
+  pagination?: { startIdx: number; perPage: number };
+}) => {
   try {
-    const purchases = await getPurchases();
+    const url = new URL(
+      `${process.env.NEXT_PUBLIC_BASE_URL}/api/users/purchases`
+    );
+
+    if (options?.userPurchasesLimit) {
+      url.searchParams.append(
+        "userPurchasesLimit",
+        options.userPurchasesLimit.toString()
+      );
+    } else if (options?.pagination) {
+      url.searchParams.append(
+        "startIdx",
+        options.pagination.startIdx.toString()
+      );
+      url.searchParams.append("perPage", options.pagination.perPage.toString());
+    }
+
+    const res = await fetch(url.toString(), { next: { revalidate: 3600 } });
+
+    if (!res.ok) throw new Error("Server error retrieving your purchases");
+
+    const data = await res.json();
+
     return {
-      data: purchases as unknown as ProductCardProps[],
-      error: null,
+      items: data.products || data,
+      totalCount: data.totalCount || data.length,
     };
   } catch (err) {
-    const error = err instanceof Error ? err.message : "Unknown error";
-    console.error(`Error while getting purchases:`, err);
-    return {
-      data: null,
-      error,
-    };
+    console.error(`Error in shopping component`, err);
+    throw err;
   }
 };
+
+export default fetchPurchases;

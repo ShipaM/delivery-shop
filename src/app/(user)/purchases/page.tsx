@@ -1,5 +1,5 @@
-import { fetchPurchases } from "../fetchPurchases";
 import GenericListPage from "@/app/(products)/GenericListPage";
+import fetchPurchases from "../fetchPurchases";
 
 const AllPurchases = async ({
   searchParams,
@@ -13,6 +13,7 @@ const AllPurchases = async ({
         fetchData: () => fetchPurchases(),
         pageTitle: "All purchases",
         basePath: "/purchases",
+        errorMessage: "Failed to load purchases",
       }}
     />
   );

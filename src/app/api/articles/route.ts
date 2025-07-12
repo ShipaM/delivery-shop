@@ -1,24 +1,49 @@
-import { getDBAndRequestBody } from "../../../../utils/api-routes";
+import { CONFIG } from "../../../../config/config";
+import { getDB } from "../../../../utils/api-routes";
 import { NextResponse } from "next/server";
-import { MongoClient } from "mongodb";
-
-const clientPromise = new MongoClient(
-  process.env.DELIVERY_SHOP_DB_URL!
-).connect();
-
-export async function getArticles() {
-  const { db } = await getDBAndRequestBody(clientPromise, null);
-  return await db.collection("articles").find().toArray();
-}
+export const dynamic = "force-dynamic";
 export const revalidate = 3600;
 
-export async function GET() {
+export async function GET(request: Request) {
   try {
-    const articles = await getArticles();
+    const db = await getDB();
+    const url = new URL(request.url);
 
-    return NextResponse.json(articles);
+    const articlesLimit = url.searchParams.get("articlesLimit");
+    const startIdx = parseInt(url.searchParams.get("startIdx") || "0");
+    const perPage = parseInt(
+      url.searchParams.get("perPage") ||
+        CONFIG.ITEMS_PER_PAGE_MAIN_ARTICLES.toString()
+    );
+
+    if (articlesLimit) {
+      const limit = parseInt(articlesLimit);
+
+      const articles = await db
+        .collection("articles")
+        .find()
+        .sort({ createdAt: -1 })
+        .limit(limit)
+        .toArray();
+      return NextResponse.json(articles);
+    }
+
+    const totalCount = await db.collection("articles").countDocuments();
+
+    const articles = await db
+      .collection("articles")
+      .find()
+      .sort({ createdAt: -1 })
+      .skip(startIdx)
+      .limit(perPage)
+      .toArray();
+
+    return NextResponse.json({ articles, totalCount });
   } catch (error) {
     console.error("Server error:", error);
-    return NextResponse.json({ message: "Server error" }, { status: 500 });
+    return NextResponse.json(
+      { message: "Error loading articles" },
+      { status: 500 }
+    );
   }
 }

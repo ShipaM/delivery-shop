@@ -1,20 +1,22 @@
-import { ProductCardProps } from "@/types/product";
+import fetchProductsByCategory from "./fetchProducts";
+import { CONFIG } from "../../../config/config";
 import ProductsSection from "./ProductsSection";
-import { fetchProductsByCategory } from "./fetchProducts";
 
-export default async function NewProducts() {
-  const { data: products, error } = await fetchProductsByCategory("new");
-
-  if (error) {
-    return <div className="text-red-500 py-8">Error: {error}</div>;
+const NewProducts = async () => {
+  try {
+    const { items } = await fetchProductsByCategory("new", {
+      randomLimit: CONFIG.ITEMS_PER_PAGE_MAIN_PRODUCTS,
+    });
+    return (
+      <ProductsSection
+        title="Новинки"
+        viewAllButton={{ text: "All new", href: "new" }}
+        products={items}
+      />
+    );
+  } catch {
+    return <div className="text-red-500">Error: failed to load new items</div>;
   }
+};
 
-  return (
-    <ProductsSection
-      title="All new products"
-      viewAllButton={{ text: "All new products", href: "/new" }}
-      products={products as ProductCardProps[]}
-      compact
-    />
-  );
-}
+export default NewProducts;

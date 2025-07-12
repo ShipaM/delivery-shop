@@ -1,41 +1,68 @@
-import { getDBAndRequestBody } from "../../../../../utils/api-routes";
+import { CONFIG } from "../../../../../config/config";
+import { getDB } from "../../../../../utils/api-routes";
 import { NextResponse } from "next/server";
-import { MongoClient } from "mongodb";
+export const dynamic = "force-dynamic";
 
-const clientPromise = new MongoClient(
-  process.env.DELIVERY_SHOP_DB_URL!
-).connect();
-
-export async function getPurchases() {
-  const { db } = await getDBAndRequestBody(clientPromise, null);
-  const user = await db.collection("users").findOne({});
-
-  if (!user?.purchases?.length) return [];
-
-  const productIds = user.purchases.map((p: { id: number }) => p.id);
-  const products = await db
-    .collection("products")
-    .find({ id: { $in: productIds } })
-    .toArray();
-
-  return products.map((product) => {
-    const { discountPercent, ...rest } = product;
-    void discountPercent;
-    return {
-      ...rest,
-    };
-  });
-}
-
-export const revalidate = 3600;
-
-export async function GET() {
+export async function GET(request: Request) {
   try {
-    const purchases = await getPurchases();
+    const db = await getDB();
 
-    return NextResponse.json(purchases);
+    const url = new URL(request.url);
+    const userPurchasesLimit = url.searchParams.get("userPurchasesLimit");
+    const startIdx = parseInt(url.searchParams.get("startIdx") || "0");
+    const perPage = parseInt(
+      url.searchParams.get("perPage") || CONFIG.ITEMS_PER_PAGE.toString()
+    );
+
+    const user = await db.collection("users").findOne({});
+
+    if (!user?.purchases?.length) {
+      return NextResponse.json({ products: [], totalCount: 0 });
+    }
+
+    const productIds = user.purchases.map((p: { id: number }) => p.id);
+
+    if (userPurchasesLimit) {
+      const limit = parseInt(userPurchasesLimit);
+
+      const purchases = await db
+        .collection("products")
+        .find({ id: { $in: productIds } })
+        .limit(limit)
+        .toArray();
+
+      return NextResponse.json(
+        purchases.map((product) => {
+          const { discountPercent, ...rest } = product;
+          void discountPercent;
+          return rest;
+        })
+      );
+    }
+
+    const totalCount = productIds.length;
+
+    const purchases = await db
+      .collection("products")
+      .find({ id: { $in: productIds } })
+      .sort({ _id: -1 })
+      .skip(startIdx)
+      .limit(perPage)
+      .toArray();
+
+    return NextResponse.json({
+      products: purchases.map((product) => {
+        const { discountPercent, ...rest } = product;
+        void discountPercent;
+        return rest;
+      }),
+      totalCount,
+    });
   } catch (error) {
     console.error("Server error:", error);
-    return NextResponse.json({ message: "Server error" }, { status: 500 });
+    return NextResponse.json(
+      { message: "Error loading purchased products" },
+      { status: 500 }
+    );
   }
 }

@@ -1,20 +1,23 @@
-import { ProductCardProps } from "@/types/product";
+import fetchProductsByCategory from "./fetchProducts";
+import { CONFIG } from "../../../config/config";
 import ProductsSection from "./ProductsSection";
-import { fetchProductsByCategory } from "./fetchProducts";
 
-export default async function AllActions() {
-  const { data: products, error } = await fetchProductsByCategory("actions");
+const Actions = async () => {
+  try {
+    const { items } = await fetchProductsByCategory("actions", {
+      randomLimit: CONFIG.ITEMS_PER_PAGE_MAIN_PRODUCTS,
+    });
 
-  if (error) {
-    return <div className="text-red-500 py-8">Error: {error}</div>;
+    return (
+      <ProductsSection
+        title="Actions"
+        viewAllButton={{ text: "All actions", href: "actions" }}
+        products={items}
+      />
+    );
+  } catch {
+    return <div className="text-red-500">Error: Failed to load stocks</div>;
   }
+};
 
-  return (
-    <ProductsSection
-      title="All actions"
-      viewAllButton={{ text: "All actions", href: "/actions" }}
-      products={products as ProductCardProps[]}
-      compact
-    />
-  );
-}
+export default Actions;

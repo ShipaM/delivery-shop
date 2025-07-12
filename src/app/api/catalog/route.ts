@@ -1,26 +1,20 @@
-import { getDB, getDBAndRequestBody } from "../../../../utils/api-routes";
-import { NextResponse } from "next/server";
-import { MongoClient, ObjectId } from "mongodb";
 import { CatalogProps } from "@/types/catalog";
-
-const clientPromise = new MongoClient(
-  process.env.DELIVERY_SHOP_DB_URL!
-).connect();
-
-export async function getCatalog() {
-  const { db } = await getDBAndRequestBody(clientPromise, null);
-  return await db.collection("catalogs").find().toArray();
-}
+import { getDB } from "../../../../utils/api-routes";
+import { NextResponse } from "next/server";
+import { ObjectId } from "mongodb";
 export const revalidate = 3600;
 
 export async function GET() {
   try {
-    const catalogs = await getCatalog();
-
-    return NextResponse.json(catalogs);
+    const db = await getDB();
+    const catalog = await db.collection("catalog").find().toArray();
+    return NextResponse.json(catalog);
   } catch (error) {
-    console.error("Server error:", error);
-    return NextResponse.json({ message: "Server error" }, { status: 500 });
+    console.error("Server:", error);
+    return NextResponse.json(
+      { message: "Error loading catalog" },
+      { status: 500 }
+    );
   }
 }
 
@@ -45,16 +39,16 @@ export async function POST(request: Request) {
       },
     }));
 
-    const result = await db.collection("catalogs").bulkWrite(bulkOps);
+    const result = await db.collection("catalog").bulkWrite(bulkOps);
 
     return NextResponse.json({
       success: true,
       updatedCount: result.modifiedCount,
     });
   } catch (error) {
-    console.error("Ошибка при обновлении порядка категорий:", error);
+    console.error("ОError updating category order:", error);
     return NextResponse.json(
-      { message: "Ошибка при обновлении порядка категорий" },
+      { message: "Error updating category order" },
       { status: 500 }
     );
   }

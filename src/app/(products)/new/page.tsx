@@ -1,25 +1,29 @@
 import { Metadata } from "next";
-import { fetchProductsByCategory } from "../fetchProducts";
 import GenericListPage from "../GenericListPage";
+import fetchProductsByCategory from "../fetchProducts";
 
 export const metadata: Metadata = {
   title: "All new items from the Severianochka store",
   description: "List of all new products",
 };
 
-export default async function AllNew({
+const AllNew = async ({
   searchParams,
 }: {
   searchParams: Promise<{ page?: string; itemsPerPage?: string }>;
-}) {
+}) => {
   return (
     <GenericListPage
       searchParams={searchParams}
       props={{
-        fetchData: () => fetchProductsByCategory("new"),
-        pageTitle: "All new products",
+        fetchData: ({ pagination: { startIdx, perPage } }) =>
+          fetchProductsByCategory("new", { pagination: { startIdx, perPage } }),
+        pageTitle: "All new",
         basePath: "/new",
+        errorMessage: "There are no new products",
       }}
     />
   );
-}
+};
+
+export default AllNew;
